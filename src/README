@@ -1,5 +1,5 @@
-Connection layer is ready
-========================
+Connection layer:
+================
 	- Two layer architecture
 	- Lower layer provides interface to read and write on sockets and deliver events.
 	- Higher layer maintains HTTP contexts - which has a buffer, client address, socket_fd, and any config related info
