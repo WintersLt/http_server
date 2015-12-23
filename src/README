@@ -1,0 +1,26 @@
+Connection layer is ready
+========================
+	- Two layer architecture
+	- Lower layer provides interface to read and write on sockets and deliver events.
+	- Higher layer maintains HTTP contexts - which has a buffer, client address, socket_fd, and any config related info
+	- There is a hash map of contexts. These contexts can be made to automatically timeout if client is too slow.(in next version may be), right now only timeout on terminate socket.
+	- When we recieve a read event on an fd, we search for context if it already exists and send the read event to context.
+	- Context fetches the data does what needs to be done.
+	- In multi threaded version, sockets are mapped to thread(by hashing) and threads hold the contexts.
+	- no persistent connections supported
+	- when a connection is accepted, one and only one new http request is expected, now allocate a buffer to that connection, keep a free buf and busy buf queue we can call it http context
+	- when a read event comes, read line by line into the buffer using buffered reader class readReqLine(). This function will be in http context class
+	- once we reach the state when complete request header has been read (GET needs only header), map the reuest url to a file in the system
+	- form a response and send it back
+	- Close the connection(use RST), remove from epollset, deallocate resources allocated to it
+	- Optionaldelayed_job_active_recordly if body also is needed in request then start waiting for body
+
+Error handling:
+==============
+	- Malformed requests, unknown HTTP methods, too long body (starvation due to a long body) 
+
+Enhancements:
+=============
+	- Multithreading: main thread only recieves polls. It forwards request to appropriate thread (thread num obtained by hashing socket_fd), and processing thread takes care of stuff from there.
+	- some timeouts needed to timeout slow clients
+	- IPC using message queues probably or pthread_cond
